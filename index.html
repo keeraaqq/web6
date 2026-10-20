@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Калькулятор стоимости заказа</title>
+    <script src="calc.js" defer></script>
+    <style>
+        :root {
+            --bg: #12141c;
+            --card: #1c1f2b;
+            --text: #eceef6;
+            --muted: #9aa1b8;
+            --border: #363b50;
+            --accent: #7c83ff;
+            --danger: #ff7b7b;
+            --ok-bg: #242842;
+            --header-bg: #1d212c;
+            --header-text: #f7d4d4;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.5;
+        }
+
+        [hidden] {
+            display: none;
+        }
+
+        .main-header {
+            background-color: var(--header-bg);
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+        }
+        .main-header h1 {
+            color: var(--header-text);
+            font-size: 28px;
+            margin: 0;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .card {
+            width: 100%;
+            max-width: 34rem;
+            padding: 2rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .card h2 {
+            margin: 0 0 0.25rem;
+            font-size: 1.5rem;
+            color: var(--header-text);
+        }
+        .lead {
+            margin: 0 0 1.5rem;
+            color: var(--muted);
+        }
+        .field {
+            margin-bottom: 1.25rem;
+        }
+        label.title,
+        legend {
+            display: block;
+            margin-bottom: 0.35rem;
+            font-weight: 600;
+        }
+        fieldset {
+            margin: 0 0 1.25rem;
+            padding: 0;
+            border: 0;
+        }
+        legend {
+            padding: 0;
+        }
+        .choice {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.4rem;
+            padding: 0.6rem 0.85rem;
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            cursor: pointer;
+        }
+        .choice input {
+            width: auto;
+            margin: 0;
+            accent-color: var(--accent);
+        }
+        select,
+        input[type="text"] {
+            width: 100%;
+            padding: 0.7rem 0.85rem;
+            font: inherit;
+            color: var(--text);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+        }
+        select:focus,
+        input:focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 1px;
+        }
+        input.invalid {
+            border-color: var(--danger);
+        }
+        .error {
+            min-height: 1.25rem;
+            margin: 0.35rem 0 0;
+            font-size: 0.9rem;
+            color: var(--danger);
+        }
+        .result {
+            margin: 0.5rem 0 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--header-text);
+        }
+        .result:not(:empty) {
+            padding: 1rem;
+            background: var(--ok-bg);
+            border-radius: 0.6rem;
+        }
+
+        .main-footer {
+            background-color: var(--header-bg);
+            padding: 15px;
+            text-align: center;
+            color: var(--header-text);
+            font-size: 14px;
+            width: 100%;
+        }
+        .main-footer p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <h1>Лабораторная работа 6</h1>
+    </header>
+
+    <div class="content-wrapper">
+        <main class="card">
+            <h2>Калькулятор стоимости заказа</h2>
+            <p class="lead">Выберите товар и количество, стоимость пересчитается автоматически.</p>
+
+            <form id="calc-form">
+                <div class="field">
+                    <label class="title" for="quantity">Количество, шт.</label>
+                    <input type="text" id="quantity" value="1" autocomplete="off"
+                        inputmode="numeric" aria-describedby="error">
+                    <p id="error" class="error" role="alert"></p>
+                </div>
+
+                <fieldset>
+                    <legend>Товар</legend>
+                    <label class="choice">
+                        <input type="radio" name="prodType" value="pipe" checked>
+                        Средство для очистки труб — 695 ₽
+                    </label>
+                    <label class="choice">
+                        <input type="radio" name="prodType" value="mop">
+                        Швабра — от 399 ₽
+                    </label>
+                    <label class="choice">
+                        <input type="radio" name="prodType" value="bucket">
+                        Ведро — от 83 ₽
+                    </label>
+                </fieldset>
+
+                <div id="options-block" class="field" hidden>
+                    <label class="title" for="option" id="option-label">Опция</label>
+                    <select id="option"></select>
+                </div>
+
+                <div id="property-block" class="field" hidden>
+                    <label class="choice">
+                        <input type="checkbox" id="property">
+                        <span id="property-label">Свойство</span>
+                    </label>
+                </div>
+            </form>
+
+            <p id="result" class="result" aria-live="polite"></p>
+        </main>
+    </div>
+
+    <footer class="main-footer">
+        <p>© Авдошина Мария</p>
+    </footer>
+
+</body>
+</html>
